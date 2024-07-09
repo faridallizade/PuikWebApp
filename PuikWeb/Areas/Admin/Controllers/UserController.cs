@@ -1,25 +1,29 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using WebUI.Areas.Admin.ViewModels;
+using WebUI.Data;
 using WebUI.Models;
 
 namespace WebUI.Areas.Admin.Controllers
 {
 	[Area(nameof(Admin))]
-    [Authorize]
-    public class UserController : Controller
+	[Authorize]
+	public class UserController : Controller
 	{
+		private readonly AppDbContext _context;
 		private readonly UserManager<AppUser> _userManager;
 		private readonly RoleManager<IdentityRole> _roleManager;
 
-		public UserController(UserManager<AppUser> userManager, RoleManager<IdentityRole> roleManager)
-		{
-			_userManager = userManager;
-			_roleManager = roleManager;
-		}
+        public UserController(UserManager<AppUser> userManager, RoleManager<IdentityRole> roleManager, AppDbContext context)
+        {
+            _userManager = userManager;
+            _roleManager = roleManager;
+            _context = context;
+        }
 
-		public IActionResult Index()
+        public IActionResult Index()
 		{
 			var users = _userManager.Users.ToList();
 			return View(users);
@@ -89,6 +93,52 @@ namespace WebUI.Areas.Admin.Controllers
 				return View();
 			}
 			return RedirectToAction("Index");
+		}
+
+		[HttpPost]
+		public async Task<IActionResult> AddToWishList (int productId)
+		{
+			var user = await _userManager.GetUserAsync(User);
+			if (user == null) return Unauthorized();
+
+			var product = await _context.Products.FindAsync(productId);
+			if (product == null) return NotFound();	
+
+			if(!user.Wishlist.Contains(product))
+			{
+				user.Wishlist.Add(product);
+				await _userManager.UpdateAsync(user);
+			}
+			return RedirectToAction("Index");
+        }
+
+
+		public async Task<IActionResult> Wishlist()
+		{
+
+			var user = await _userManager.GetUserAsync(User);
+			if (user == null) return Unauthorized();
+
+			var wishlist = user.Wishlist.ToList();
+
+			return View(wishlist);
+		}
+
+		[HttpPost]
+		public async Task<IActionResult> DeleteFromWishlist(int ProductId)
+		{
+			var user = await _userManager.GetUserAsync(User);
+			if (user == null) return Unauthorized();
+
+			var product = user.Wishlist.FirstOrDefault( p => p.Id == ProductId );
+			if (product != null)
+			{
+				user.Wishlist.Remove(product);
+				await _userManager.UpdateAsync(user);
+			}
+			return RedirectToAction("Index");
+
+
 		}
 	}
 }

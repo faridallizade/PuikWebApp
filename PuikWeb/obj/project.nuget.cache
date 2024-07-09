@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "buV4WpE6wQuzAEhcyZ8JlFaQbU2BMFh20jjbm9om0oUfC7BiOT8J+sIyPPVaVrUBtKe/BWYFxFWQMqK4MzQZvQ==",
+  "dgSpecHash": "HiQt0tZRzWp6jlBD145ywZlR90psxVmvBqD+0k/tbY11v76ggqbleAj83uMoMTBjP7fXQZSRV0D/i7kVUVzMfw==",
   "success": true,
-  "projectFilePath": "C:\\Users\\Asus\\Desktop\\Puik\\PuikWeb\\WebUI.csproj",
+  "projectFilePath": "C:\\Users\\Asus\\Desktop\\PuikWebApp\\PuikWeb\\WebUI.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\Asus\\.nuget\\packages\\azure.core\\1.35.0\\azure.core.1.35.0.nupkg.sha512",
     "C:\\Users\\Asus\\.nuget\\packages\\azure.identity\\1.10.3\\azure.identity.1.10.3.nupkg.sha512",

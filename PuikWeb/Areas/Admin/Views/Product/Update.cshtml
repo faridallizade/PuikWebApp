@@ -1,39 +1,35 @@
-﻿@using WebUI.Areas.Admin.DTOs
-@model UpdateProductDTO
+﻿@using WebUI.Areas.Admin.ViewModels;
+@model UpdateProductVM
 
-<div class="container mt-4">
-    <div class="row justify-content-center">
-        <div class="col-md-6">
-            <div class="card">
-                <div class="card-header">
-                    <h3 class="card-title">Update Product</h3>
-                </div>
-                <div class="card-body">
-                    <form method="post" enctype="multipart/form-data">
-                        <div class="form-group">
-                            <label asp-for="Name" class="control-label"></label>
-                            <input asp-for="Name" class="form-control" placeholder="Enter product name" />
-                            <span asp-validation-for="Name" class="text-danger"></span>
-                        </div>
-                        <img src="~/Upload/ProductImages/@Model.ImageUrl" class="img-thumbnail" style="max-width: 250px;" />
-                        <div class="form-group">
-                            <label asp-for="File" class="control-label"></label>
-                            <input asp-for="File" type="file" class="form-control-file" />
-                            <span asp-validation-for="File" class="text-danger"></span>
-                        </div>
-                        <div class="form-group">
-                            <label asp-for="Price" class="control-label"></label>
-                            <input asp-for="Price" class="form-control" placeholder="Enter product price" />
-                            <span asp-validation-for="Price" class="text-danger"></span>
-                        </div>
-                        <div class="form-group">
-                            <button type="submit" class="btn btn-primary">Update</button>
-                            <a asp-action="Index" asp-controller="Product" class="btn btn-warning btn-sm">Back to Table</a>
+<h1>Edit Product</h1>
 
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
+<form asp-action="Update" enctype="multipart/form-data">
+    <input type="hidden" asp-for="Product.ID" />
+    <div class="form-group">
+        <label asp-for="Product.Name" class="control-label"></label>
+        <input asp-for="Product.Name" class="form-control" />
+        <span asp-validation-for="Product.Name" class="text-danger"></span>
     </div>
+    <div class="form-group">
+        <label asp-for="Product.Price" class="control-label"></label>
+        <input asp-for="Product.Price" class="form-control" />
+        <span asp-validation-for="Product.Price" class="text-danger"></span>
+    </div>
+    <div class="form-group">
+        <label asp-for="Product.File" class="control-label"></label>
+        <input asp-for="Product.File" type="file" class="form-control" />
+        <span asp-validation-for="Product.File" class="text-danger"></span>
+    </div>
+    <div class="form-group">
+        <label asp-for="Product.CategoryId" class="control-label"></label>
+        <select asp-for="Product.CategoryId" class="form-control" asp-items="@(new SelectList(Model.Categories, "Id", "Name"))"></select>
+        <span asp-validation-for="Product.CategoryId" class="text-danger"></span>
+    </div>
+    <div class="form-group">
+        <input type="submit" value="Save" class="btn btn-primary" />
+    </div>
+</form>
+
+<div>
+    <a asp-action="Index">Back to List</a>
 </div>

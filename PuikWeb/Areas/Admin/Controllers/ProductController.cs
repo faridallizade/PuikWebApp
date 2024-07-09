@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using WebUI.Areas.Admin.DTOs;
+using WebUI.Areas.Admin.ViewModels;
 using WebUI.Data;
 using WebUI.Helpers;
 using WebUI.Models;
@@ -29,43 +30,50 @@ namespace WebUI.Areas.Admin.Controllers
 
 
 
-        public IActionResult Create()
+        public async Task<IActionResult> Create()
         {
-            return View();
+            var categories = await _context.Categories.ToListAsync();
+            var viewModel = new CreateProductVM
+            {
+                Product = new CreateProductDTO(),
+                Categories = categories
+            };
+            return View(viewModel);
         }
 
+
         [HttpPost]
-        public async Task<IActionResult> Create(CreateProductDTO product)
+        public async Task<IActionResult> Create(CreateProductVM viewModel)
         {
             if (ModelState.IsValid)
             {
-                var prod = new Product
+                var product = new Product
                 {
-                    Name = product.Name,
-                    Price = product.Price,
-                    CreateDate = DateTime.Now,
-                    UpdateDate = DateTime.Now,
+                    Name = viewModel.Product.Name,
+                    Price = viewModel.Product.Price,
+                    CreatedAt = DateTime.Now,
+                    CategoryId = viewModel.Product.CategoryId
                 };
 
-                if (FileManager.CheckLength(product.File, 3) && FileManager.CheckType(product.File, "image/"))
+                if (FileManager.CheckLength(viewModel.Product.File, 3) && FileManager.CheckType(viewModel.Product.File, "image/"))
                 {
-                    prod.ImgUrl = FileManager.Upload(product.File, _env.WebRootPath, @"\Upload\ProductImages\");
+                    product.ImgUrl = FileManager.Upload(viewModel.Product.File, _env.WebRootPath, @"\Upload\ProductImages\");
                 }
                 else
                 {
-                    ModelState.AddModelError("File", "Only photo files below 3 mb allowed");
-
-                    return View(product);
+                    ModelState.AddModelError("Product.File", "Only photo files below 3 mb allowed");
+                    viewModel.Categories = await _context.Categories.ToListAsync(); 
+                    return View(viewModel);
                 }
 
-                _context.Products.Add(prod);
+                _context.Products.Add(product);
                 await _context.SaveChangesAsync();
-
 
                 return RedirectToAction(nameof(Index));
             }
 
-            return View(product);
+            viewModel.Categories = await _context.Categories.ToListAsync(); 
+            return View(viewModel);
         }
 
         public async Task<IActionResult> Update(int id)
@@ -81,59 +89,63 @@ namespace WebUI.Areas.Admin.Controllers
                 return NotFound();
             }
 
-            var prod = new UpdateProductDTO
+            var categories = await _context.Categories.ToListAsync();
+            var viewModel = new UpdateProductVM
             {
-                ID = product.Id,
-                Name = product.Name,
-                Price = product.Price,
-                ImageUrl = product.ImgUrl
+                Product = new UpdateProductDTO
+                {
+                    ID = product.Id,
+                    Name = product.Name,
+                    Price = product.Price,
+                    ImageUrl = product.ImgUrl,
+                    CategoryId = product.CategoryId
+                },
+                Categories = categories
             };
 
-            return View(prod);
+            return View(viewModel);
         }
 
         [HttpPost]
-        public async Task<IActionResult> Update(UpdateProductDTO product)
+        public async Task<IActionResult> Update(UpdateProductVM viewModel)
         {
-            if (product.ID <= 0)
+            if (viewModel.Product.ID <= 0)
             {
                 return NotFound();
             }
 
             if (ModelState.IsValid)
             {
-
-                var prod = await _context.Products.FindAsync(product.ID);
-                if (prod == null)
+                var product = await _context.Products.FindAsync(viewModel.Product.ID);
+                if (product == null)
                 {
                     return NotFound();
                 }
 
-                prod.Name = product.Name;
-                prod.Price = product.Price;
-                prod.UpdateDate = DateTime.Now;
+                product.Name = viewModel.Product.Name;
+                product.Price = viewModel.Product.Price;
+                product.CategoryId = viewModel.Product.CategoryId;
 
-
-                if (FileManager.CheckLength(product.File, 3) && FileManager.CheckType(product.File, "image/"))
+                if (FileManager.CheckLength(viewModel.Product.File, 3) && FileManager.CheckType(viewModel.Product.File, "image/"))
                 {
-                    FileManager.Delete(prod.ImgUrl, _env.WebRootPath, @"\Upload\ProductImages\");
-
-                    prod.ImgUrl = FileManager.Upload(product.File, _env.WebRootPath, @"\Upload\ProductImages\");
+                    FileManager.Delete(product.ImgUrl, _env.WebRootPath, @"\Upload\ProductImages\");
+                    product.ImgUrl = FileManager.Upload(viewModel.Product.File, _env.WebRootPath, @"\Upload\ProductImages\");
                 }
                 else
                 {
-
-                    ModelState.AddModelError("File", "Only photo files below 3 mb allowed");
-                    return View(product);
+                    ModelState.AddModelError("Product.File", "Only photo files below 3 mb allowed");
+                    viewModel.Categories = await _context.Categories.ToListAsync(); 
+                    return View(viewModel);
                 }
 
-                _context.Products.Update(prod);
+                _context.Products.Update(product);
                 await _context.SaveChangesAsync();
 
                 return RedirectToAction(nameof(Index));
             }
 
-            return View(product);
+            viewModel.Categories = await _context.Categories.ToListAsync();
+            return View(viewModel);
         }
 
         public async Task<IActionResult> Delete(int? id)
